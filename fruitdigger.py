@@ -1,0 +1,256 @@
+# 10 mango id 1
+# 8 apple id 2
+# 4 watermelon id 3
+# 4 pomgranate id 4
+# 3 coconut id 5
+# 2 Cherry id 6
+# 2 durian id 7
+# 1 dragonfruit id 8
+# 15 bombs id 9
+# 5 rum id 10
+
+import random
+import os
+import pygame as pyg
+import sys
+WIN = pyg.display.set_mode((0,0), pyg.FULLSCREEN)
+WIDTH, HEIGHT = pyg.display.get_surface().get_size()
+pyg.display.set_caption("Fruit Digger")
+pyg.font.init()
+applepng = pyg.image.load(os.path.join("fruit", "apple.png"))
+bombpng = pyg.image.load(os.path.join("fruit", "bomb.png"))
+cherrypng = pyg.image.load(os.path.join("fruit", "cherry.png"))
+coconutpng = pyg.image.load(os.path.join("fruit", "coconut.png"))
+dragonfruitpng = pyg.image.load(os.path.join("fruit", "dragonfruit.png"))
+durianpng = pyg.image.load(os.path.join("fruit", "durian.png"))
+mangopng = pyg.image.load(os.path.join("fruit", "mango.png"))
+pomegranatepng = pyg.image.load(os.path.join("fruit", "pomegranate.png"))
+rumpng = pyg.image.load(os.path.join("fruit", "rum.png"))
+watermelonpng = pyg.image.load(os.path.join("fruit", "watermelon.png"))
+sandpng = pyg.image.load(os.path.join("fruit", "sand.jpg"))
+sandpng = pyg.transform.smoothscale(sandpng, (120, 120))
+
+
+points = 0
+moves = 15
+duglist = []
+def shuffle_board():
+    unshuffled = [1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,6,6,7,7,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]
+    print(len(unshuffled))
+    tempcase = 0
+    for x in range(0,10000):
+        firstnum = random.randint(0,len(unshuffled)-1)
+        secondnum = random.randint(0,len(unshuffled)-1)
+        tempcase = unshuffled[secondnum]
+        unshuffled[secondnum] = unshuffled[firstnum]
+        unshuffled[firstnum] = tempcase
+
+    for x in range(0,5):
+        unshuffled[random.randint(0,48)] = 10
+
+    return unshuffled
+
+def split_list_board(slist):
+    table = []
+    for x in range(0,7):
+        row = []
+        for y in range(0,7):
+            row.append(slist[y+(x*7)])
+            #print(y+(x*7))
+        table.append(row)
+    return table
+
+def display_board(list):
+    for x in range(0,7):
+        row = []
+        for y in range(0,7):
+            row.append(list[y+(x*7)])
+            #print(y+(x*7))
+        print(row)
+shlist = shuffle_board()
+table = []
+table = split_list_board(shlist)
+display_board(shlist)
+
+def spot_checker(x,y,table):
+    scan_spots = []
+    if y == 0 or y ==6 or x == 0 or x == 6:
+        #top left corner
+        if y == 0 and x == 0:
+            scan_spots = [[table[y][x+1], x+1, y], [table[y+1][x], x, y+1], [table[y+1][x+1], x+1, y+1]]
+        #top border
+        elif y == 0 and x != 0 and x != 6:
+            scan_spots = [[table[y][x-1], x-1, y], [table[y][x+1], x+1, y], [table[y+1][x-1], x-1, y+1], [table[y+1][x], x, y+1], [table[y+1][x+1], x+1, y+1]]
+        #top right corner
+        elif y == 0 and x == 6:
+            scan_spots = [[table[y][x-1], x-1, y],[table[y+1][x-1], x-1, y+1],[table[y+1][x], x, y+1]]
+        #left border
+        elif y != 0 and y!= 6 and x == 0:
+            scan_spots = [[table[y-1][x], x, y-1], [table[y-1][x+1], x+1, y-1], [table[y][x+1], x+1, y], [table[y+1][x], x, y+1], [table[y+1][x+1], x+1, y+1]]
+        #right border
+        elif y != 0 and y != 6 and x == 6:
+            scan_spots = [[table[y-1][x-1], x-1, y-1], [table[y-1][x], x, y-1], [table[y][x-1], x-1, y], [table[y+1][x-1], x-1, y+1], [table[y+1][x], x, y+1]]
+        #bottom border
+        elif y == 6 and x != 0 and x != 6:
+            scan_spots = [[table[y-1][x-1], x-1, y-1], [table[y-1][x], x, y-1], [table[y-1][x+1], x+1, y-1], [table[y][x-1], x-1, y], [table[y][x+1], x+1, y]] 
+        #bottom left corner
+        elif y == 6 and x == 0:
+            scan_spots = [[table[y-1][x], x, y-1], [table[y-1][x+1], x+1, y-1], [table[y][x+1], x+1, y]]
+        #bottom right corner
+        elif y == 6 and x == 6:
+            scan_spots = [[table[y-1][x-1], x-1, y-1], [table[y-1][x], x, y-1], [table[y][x-1], x-1, y]]
+    else:
+        scan_spots = [[table[y-1][x-1], x-1, y-1], [table[y-1][x], x, y-1], [table[y-1][x+1], x+1, y-1], [table[y][x-1], x-1, y], [table[y][x+1], x+1, y], [table[y+1][x-1], x-1, y+1], [table[y+1][x], x, y+1], [table[y+1][x+1], x+1, y+1]]
+
+    return scan_spots
+
+
+
+def bomb(x,y,table):
+    destroyedamount = random.randint(1,2)
+    if destroyedamount == 1:
+        scan_spots = spot_checker(x,y,table)
+        print(scan_spots)
+        spot = random.randint(0,len(scan_spots)-1)
+        bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
+        print(bombedspot)
+            
+    elif destroyedamount == 2:
+        scan_spots = spot_checker(x,y,table)
+        spot = random.randint(0,len(scan_spots)-1)
+        bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
+        print(bombedspot)
+
+    return bombedspot
+# 10 mango id 1
+# 8 apple id 2
+# 4 watermelon id 3
+# 4 pomgranate id 4
+# 3 coconut id 5
+# 2 Cherry id 6
+# 2 durian id 7
+# 1 dragonfruit id 8
+# 15 bombs id 9
+# 5 rum id 10
+def mango(x,y,table):
+    return 300
+def apple():
+    applecount = 0
+    for x in duglist:
+        if x == 2:
+            applecount+=1
+    return (applecount*100)
+def watermelon(x,y,table):
+    points += 100
+    scan_spots = spot_checker(x,y,table)
+    spot = random.randint(0,len(scan_spots)-1)
+    bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
+    table[bombedspot[1], bombedspot[0]]
+def pomegranate():
+    pass
+def coconut():
+    pass
+def cherry():
+    pass
+def durian():
+    pass
+def dragonfruit():
+    pass
+def rum():
+    pass
+digdict = {
+    1:mango,
+    2:apple,
+    3:watermelon,
+    4:pomegranate,
+    5:coconut,
+    6:cherry,
+    7:durian,
+    8:dragonfruit,
+    9:bomb,
+    10:rum
+}
+# pointdict = {
+#     1:300,
+#     2:apple,
+#     3:watermelon,
+#     4:pomegranate,
+#     5:coconut,
+#     6:cherry,
+#     7:durian,
+#     8:dragonfruit,
+#     9:bomb,
+#     10:rum
+# }
+
+class Spot(pyg.sprite.Sprite):
+    def __init__(self, x, y, group, icon):
+        super().__init__(group)
+        self.x = x
+        self.y = y
+        self.image = sandpng
+        self.under = icon
+        self.flipped = False
+        
+class Board(pyg.sprite.Group):
+    def __init__(self):
+        super().__init__()
+
+    def draw(self):
+        for sprite in self.sprites():
+            if sprite.flipped == True:
+                WIN.blit(sprite.under, (playarea/7*sprite.x,HEIGHT/7*sprite.y))
+            else:
+                WIN.blit(sprite.image, (playarea/7*sprite.x,HEIGHT/7*sprite.y))
+def mine(x,y,table,mode):
+    pass
+
+def bomb_dowse(x,y,table):
+    bombcount = 0
+    scan_spots = spot_checker(x,y,table)
+    for x in scan_spots:
+                if x[0] == 9:
+                    bombcount+=1
+    return bombcount
+        
+
+
+for y in range(0, 7):
+    for x in range(0,7):
+        print(f"There are {bomb_dowse(x,y,table)} bombs nearby at pos ({x}, {y})")
+#print(bomb_dowse(0,0,table))
+
+digdict[1](1,1,table)
+#bomb(1,1,table)
+#bomb(1,1,table)
+#bomb(1,1,table)
+WIN.fill((94, 128, 87))
+playarea = WIDTH-100
+board = Board()
+pyg.display.update()
+run = True
+for y in range(0,7):
+    for x in range(0,7):
+        #WIN.blit(sandpng,(playarea/7*x, HEIGHT/7*y) )
+        Spot(x,y, board, bombpng)
+while run == True:
+    mouse = pyg.event.get()
+    mouse = pyg.mouse.get_pos()
+    board.draw()
+    pyg.display.update()
+    for event in pyg.event.get():
+        if event.type == pyg.QUIT:
+            run = False
+            pyg.quit()
+            sys.exit()
+        if event.type == pyg.KEYDOWN and event.key == pyg.K_ESCAPE:
+            run = False
+            pyg.quit()
+            sys.exit()
+        if event.type == pyg.MOUSEBUTTONDOWN:
+            if mouse[0] >= 0 and mouse[0] <= 120 and mouse[1] >= 0 and mouse[1] <= 120:
+                spot = table[0][0]
+                digdict[spot](0,0,table)
+                print(spot)
+    
+pyg.quit()
