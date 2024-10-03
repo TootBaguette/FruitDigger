@@ -17,18 +17,30 @@ WIN = pyg.display.set_mode((0,0), pyg.FULLSCREEN)
 WIDTH, HEIGHT = pyg.display.get_surface().get_size()
 pyg.display.set_caption("Fruit Digger")
 pyg.font.init()
-applepng = pyg.image.load(os.path.join("fruit", "apple.png"))
-bombpng = pyg.image.load(os.path.join("fruit", "bomb.png"))
-cherrypng = pyg.image.load(os.path.join("fruit", "cherry.png"))
-coconutpng = pyg.image.load(os.path.join("fruit", "coconut.png"))
-dragonfruitpng = pyg.image.load(os.path.join("fruit", "dragonfruit.png"))
-durianpng = pyg.image.load(os.path.join("fruit", "durian.png"))
-mangopng = pyg.image.load(os.path.join("fruit", "mango.png"))
-pomegranatepng = pyg.image.load(os.path.join("fruit", "pomegranate.png"))
-rumpng = pyg.image.load(os.path.join("fruit", "rum.png"))
-watermelonpng = pyg.image.load(os.path.join("fruit", "watermelon.png"))
-sandpng = pyg.image.load(os.path.join("fruit", "sand.jpg"))
+applepng = pyg.image.load(os.path.join("fruit", "apple.png")).convert_alpha()
+bombpng = pyg.image.load(os.path.join("fruit", "bomb.png")).convert_alpha()
+cherrypng = pyg.image.load(os.path.join("fruit", "cherry.png")).convert_alpha()
+coconutpng = pyg.image.load(os.path.join("fruit", "coconut.png")).convert_alpha()
+dragonfruitpng = pyg.image.load(os.path.join("fruit", "dragonfruit.png")).convert_alpha()
+durianpng = pyg.image.load(os.path.join("fruit", "durian.png")).convert_alpha()
+mangopng = pyg.image.load(os.path.join("fruit", "mango.png")).convert_alpha()
+pomegranatepng = pyg.image.load(os.path.join("fruit", "pomegranate.png")).convert_alpha()
+rumpng = pyg.image.load(os.path.join("fruit", "rum.png")).convert_alpha()
+watermelonpng = pyg.image.load(os.path.join("fruit", "watermelon.png")).convert_alpha()
+sandpng = pyg.image.load(os.path.join("fruit", "sand.jpg")).convert_alpha()
+sandstonepng = pyg.image.load(os.path.join("fruit", "sandstone.png")).convert_alpha()
+applepng = pyg.transform.smoothscale(applepng, (120, 120))
+bombpng = pyg.transform.smoothscale(bombpng, (120, 120))
+cherrypng = pyg.transform.smoothscale(cherrypng, (120, 120))
+coconutpng = pyg.transform.smoothscale(coconutpng, (120, 120))
+dragonfruitpng = pyg.transform.smoothscale(dragonfruitpng, (120, 120))
+durianpng = pyg.transform.smoothscale(durianpng, (120, 120))
+mangopng = pyg.transform.smoothscale(mangopng, (120, 120))
+pomegranatepng = pyg.transform.smoothscale(pomegranatepng, (120, 120))
+rumpng = pyg.transform.smoothscale(rumpng, (120, 120))
+watermelonpng = pyg.transform.smoothscale(watermelonpng, (120, 120))
 sandpng = pyg.transform.smoothscale(sandpng, (120, 120))
+sandstonepng = pyg.transform.smoothscale(sandstonepng, (120, 120))
 
 
 points = 0
@@ -102,8 +114,10 @@ def spot_checker(x,y,table):
     else:
         scan_spots = [[table[y-1][x-1], x-1, y-1], [table[y-1][x], x, y-1], [table[y-1][x+1], x+1, y-1], [table[y][x-1], x-1, y], [table[y][x+1], x+1, y], [table[y+1][x-1], x-1, y+1], [table[y+1][x], x, y+1], [table[y+1][x+1], x+1, y+1]]
 
-    return scan_spots
 
+    scan_spots = board.check_normal(scan_spots)
+
+    return scan_spots
 
 
 def bomb(x,y,table):
@@ -111,17 +125,18 @@ def bomb(x,y,table):
     if destroyedamount == 1:
         scan_spots = spot_checker(x,y,table)
         print(scan_spots)
-        spot = random.randint(0,len(scan_spots)-1)
-        bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
-        print(bombedspot)
+        if (len(scan_spots)-1) != 0:
+            spot = random.randint(0,len(scan_spots)-1)
+            bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
+            board.destroy(bombedspot[0], bombedspot[1])
             
     elif destroyedamount == 2:
         scan_spots = spot_checker(x,y,table)
-        spot = random.randint(0,len(scan_spots)-1)
-        bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
-        print(bombedspot)
-
-    return bombedspot
+        print(len(scan_spots))
+        if (len(scan_spots)-1) != 0:
+            spot = random.randint(0,len(scan_spots)-1)
+            bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
+            board.destroy(bombedspot[0], bombedspot[1])
 # 10 mango id 1
 # 8 apple id 2
 # 4 watermelon id 3
@@ -133,30 +148,31 @@ def bomb(x,y,table):
 # 15 bombs id 9
 # 5 rum id 10
 def mango(x,y,table):
-    return 300
-def apple():
+    global points
+    points += 300
+def apple(x,y,table):
+    global points
     applecount = 0
     for x in duglist:
         if x == 2:
             applecount+=1
-    return (applecount*100)
+    points += applecount*100
 def watermelon(x,y,table):
-    points += 100
     scan_spots = spot_checker(x,y,table)
     spot = random.randint(0,len(scan_spots)-1)
     bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
-    table[bombedspot[1], bombedspot[0]]
-def pomegranate():
+    #table[bombedspot[1], bombedspot[0]]
+def pomegranate(x,y,table):
     pass
-def coconut():
+def coconut(x,y,table):
     pass
-def cherry():
+def cherry(x,y,table):
     pass
-def durian():
+def durian(x,y,table):
     pass
-def dragonfruit():
+def dragonfruit(x,y,table):
     pass
-def rum():
+def rum(x,y,table):
     pass
 digdict = {
     1:mango,
@@ -169,6 +185,18 @@ digdict = {
     8:dragonfruit,
     9:bomb,
     10:rum
+}
+pngdict = {
+    1:mangopng,
+    2:applepng,
+    3:watermelonpng,
+    4:pomegranatepng,
+    5:coconutpng,
+    6:cherrypng,
+    7:durianpng,
+    8:dragonfruitpng,
+    9:bombpng,
+    10:rumpng
 }
 # pointdict = {
 #     1:300,
@@ -184,13 +212,18 @@ digdict = {
 # }
 
 class Spot(pyg.sprite.Sprite):
-    def __init__(self, x, y, group, icon):
+    def __init__(self, x, y, id, group, icon):
         super().__init__(group)
         self.x = x
         self.y = y
+        self.id = id
         self.image = sandpng
+        self.broken = sandstonepng
         self.under = icon
+        self.normal = True
         self.flipped = False
+        self.scanned = False
+        self.cracked = False
         
 class Board(pyg.sprite.Group):
     def __init__(self):
@@ -200,8 +233,49 @@ class Board(pyg.sprite.Group):
         for sprite in self.sprites():
             if sprite.flipped == True:
                 WIN.blit(sprite.under, (playarea/7*sprite.x,HEIGHT/7*sprite.y))
+            elif sprite.cracked == True:
+                WIN.blit(sprite.broken, (playarea/7*sprite.x,HEIGHT/7*sprite.y))
+            elif sprite.scanned == True:
+                WIN.blit(sprite.image, (playarea/7*sprite.x,HEIGHT/7*sprite.y))
+                WIN.blit(sprite.under, (playarea/7*sprite.x,HEIGHT/7*sprite.y))
             else:
                 WIN.blit(sprite.image, (playarea/7*sprite.x,HEIGHT/7*sprite.y))
+
+    def check_normal(self, scan_spots):
+        cleaned_spots = []
+        for sprite in self.sprites():
+            for obj in scan_spots:
+                if sprite.x == obj[1] and sprite.y == obj[2]:
+                    if sprite.normal == True:
+                        cleaned_spots.append(obj)
+
+        return cleaned_spots
+
+    def clickcheck(self, mouse):
+        for sprite in self.sprites():
+            if sprite.normal == True:
+            #print(f"{playarea/7*sprite.x} to {(playarea/7*sprite.x)+120}\n{HEIGHT/7*sprite.y} to {(HEIGHT/7*sprite.y)+120}\nmouse is {mouse}")
+            #print(f"{mouse[0]} >= {playarea/7*sprite.x}")
+                if mouse[0] >= playarea/7*sprite.x and mouse[0] <= (playarea/7*sprite.x)+120 and mouse[1] >= HEIGHT/7*sprite.y and mouse[1] <= HEIGHT/7*sprite.y+120:
+                    sprite.flipped = True
+                    sprite.normal = False
+                    sprite.scanned = False
+                    duglist.append(sprite.id)
+                    digdict[sprite.id](sprite.x, sprite.y, table)
+    
+    def destroy(self, spotx, spoty):
+        for sprite in self.sprites():
+            #print(f"{spotx} bombed x")
+            #print(f"{sprite.x} checked x")
+            #print(f"{spoty} bombed y")
+            #print(f"{sprite.y} checked y")
+            if spotx == sprite.x and spoty == sprite.y:
+                sprite.cracked = True
+                sprite.normal = False
+                print("ASDHASDK")
+        print("AGGG")
+               
+
 def mine(x,y,table,mode):
     pass
 
@@ -215,9 +289,9 @@ def bomb_dowse(x,y,table):
         
 
 
-for y in range(0, 7):
-    for x in range(0,7):
-        print(f"There are {bomb_dowse(x,y,table)} bombs nearby at pos ({x}, {y})")
+# for y in range(0, 7):
+#     for x in range(0,7):
+#         print(f"There are {bomb_dowse(x,y,table)} bombs nearby at pos ({x}, {y})")
 #print(bomb_dowse(0,0,table))
 
 digdict[1](1,1,table)
@@ -232,10 +306,11 @@ run = True
 for y in range(0,7):
     for x in range(0,7):
         #WIN.blit(sandpng,(playarea/7*x, HEIGHT/7*y) )
-        Spot(x,y, board, bombpng)
+        Spot(x,y, table[y][x],board, pngdict[table[y][x]])
 while run == True:
     mouse = pyg.event.get()
     mouse = pyg.mouse.get_pos()
+    WIN.fill((94, 128, 87))
     board.draw()
     pyg.display.update()
     for event in pyg.event.get():
@@ -248,9 +323,6 @@ while run == True:
             pyg.quit()
             sys.exit()
         if event.type == pyg.MOUSEBUTTONDOWN:
-            if mouse[0] >= 0 and mouse[0] <= 120 and mouse[1] >= 0 and mouse[1] <= 120:
-                spot = table[0][0]
-                digdict[spot](0,0,table)
-                print(spot)
+            board.clickcheck(mouse)
     
 pyg.quit()
