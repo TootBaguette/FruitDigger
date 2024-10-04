@@ -16,6 +16,8 @@ import sys
 
 WIN = pyg.display.set_mode((0, 0), pyg.FULLSCREEN)
 WIDTH, HEIGHT = pyg.display.get_surface().get_size()
+first_cherry = True
+next_bomb = True
 pyg.display.set_caption("Fruit Digger")
 pyg.font.init()
 applepng = pyg.image.load(os.path.join("fruit", "apple.png")).convert_alpha()
@@ -47,6 +49,8 @@ rumpng = pyg.transform.smoothscale(rumpng, (120, 120))
 watermelonpng = pyg.transform.smoothscale(watermelonpng, (120, 120))
 sandpng = pyg.transform.smoothscale(sandpng, (120, 120))
 sandstonepng = pyg.transform.smoothscale(sandstonepng, (120, 120))
+
+bigfont = pyg.font.SysFont('arial', 70)
 
 points = 0
 moves = 15
@@ -167,23 +171,26 @@ def spot_checker(x, y, table):
 
 
 def bomb(x, y, table):
+    global next_bomb
     destroyedamount = random.randint(1, 2)
-    if destroyedamount == 1:
-        scan_spots = spot_checker(x, y, table)
-        print(scan_spots)
-        if (len(scan_spots)) > 0:
-            print("ITS NOT TRUE")
-            spot = random.randint(0, len(scan_spots))-1
-            bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
-            board.destroy(bombedspot[0], bombedspot[1])
+    if next_bomb == True:
+        if destroyedamount == 1:
+            scan_spots = spot_checker(x, y, table)
+            print(scan_spots)
+            if (len(scan_spots)) > 0:
+                print("ITS NOT TRUE")
+                spot = random.randint(0, len(scan_spots))-1
+                bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
+                board.destroy(bombedspot[0], bombedspot[1])
 
-    elif destroyedamount == 2:
-        scan_spots = spot_checker(x, y, table)
-        print(len(scan_spots))
-        if (len(scan_spots)) > 0:
-            spot = random.randint(0, len(scan_spots))-1
-            bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
-            board.destroy(bombedspot[0], bombedspot[1])
+        elif destroyedamount == 2:
+            scan_spots = spot_checker(x, y, table)
+            print(len(scan_spots))
+            if (len(scan_spots)) > 0:
+                spot = random.randint(0, len(scan_spots))-1
+                bombedspot = [scan_spots[spot][1], scan_spots[spot][2]]
+                board.destroy(bombedspot[0], bombedspot[1])
+    next_bomb = True
 
 
 # 10 mango id 1
@@ -237,19 +244,28 @@ def pomegranate(x, y, table):
 
 
 def coconut(x, y, table):
-    pass
+    global points, mult, next_bomb
+    points += 200*mult
+    next_bomb = False
 
 
 def cherry(x, y, table):
-    pass
-
+    global points, mult, first_cherry
+    if first_cherry == True:
+        points += 200*mult
+        first_cherry = False
+    else:
+        points += 500*mult
 
 def durian(x, y, table):
-    pass
+    global points, mult
+    points += 800 * mult
+    mult = .5
 
 
 def dragonfruit(x, y, table):
-    pass
+    global points, mult
+    points += 1200
 
 
 def rum(x, y, table):
@@ -394,29 +410,59 @@ def bomb_dowse(x, y, table):
             bombcount += 1
     return bombcount
 
+def lowestfruit_dowse(x,y,table):
+    pointoptions = []
+    lowestpoint = []
+    scan_spots = spot_checker(x,y,table)
+    print(scan_spots)
+    for x in scan_spots:
+        pointoptions = [pointdict[x[0]], x]
+        print(pointoptions)
+    for x in range(0,len(pointoptions)-1):
+        if pointoptions[x][0] <= pointoptions[x+1][0]:
+            lowestpoint = pointoptions[x]
+        
+    print(lowestpoint)
 
+
+
+pointdict = {
+    1: 300,
+    2: 0,
+    3: 100,
+    4: 200,
+    5: 200,
+    6: 200,
+    7: 800,
+    8: 1200,
+    9: 100000,
+    10: 1000000,
+}
 # for y in range(0, 7):
 #     for x in range(0,7):
 #         print(f"There are {bomb_dowse(x,y,table)} bombs nearby at pos ({x}, {y})")
 #print(bomb_dowse(0,0,table))
 
-digdict[1](1, 1, table)
 #bomb(1,1,table)
 #bomb(1,1,table)
 #bomb(1,1,table)
 WIN.fill((94, 128, 87))
-playarea = WIDTH - 100
+playarea = WIDTH - 200
 board = Board()
 pyg.display.update()
+
 run = True
 for y in range(0, 7):
     for x in range(0, 7):
         #WIN.blit(sandpng,(playarea/7*x, HEIGHT/7*y) )
         Spot(x, y, table[y][x], board, pngdict[table[y][x]])
+lowestfruit_dowse(1,1,table)
 while run == True:
     mouse = pyg.event.get()
     mouse = pyg.mouse.get_pos()
     WIN.fill((94, 128, 87))
+    counter = bigfont.render(f'{points}', True, (255,255,255))
+    WIN.blit(counter, (playarea, 20))
     board.draw()
     pyg.display.update()
     for event in pyg.event.get():
