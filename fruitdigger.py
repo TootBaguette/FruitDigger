@@ -348,6 +348,11 @@ class Board(pyg.sprite.Group):
                 WIN.blit(sprite.image,
                          (playarea / 7 * sprite.x, HEIGHT / 7 * sprite.y))
 
+    def scan(self, spotx, spoty):
+        for sprite in self.sprites():
+            if spotx == sprite.x and spoty == sprite.y:
+                sprite.scanned = True 
+
     def watermelonpop(self, spotx, spoty):
         for sprite in self.sprites():
             #print(f"{spotx} bombed x")
@@ -420,7 +425,6 @@ def lowestfruit_dowse(x,y,table):
     for x in range(0,len(pointoptions)-1):
         if pointoptions[x][0] < pointoptions[x+1][0] and pointoptions[x][0] <10000:
             lowestpoint = pointoptions[x][1]
-        
     return lowestpoint
 
 
