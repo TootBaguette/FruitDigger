@@ -416,13 +416,12 @@ def lowestfruit_dowse(x,y,table):
     scan_spots = spot_checker(x,y,table)
     print(scan_spots)
     for x in scan_spots:
-        pointoptions = [pointdict[x[0]], x]
-        print(pointoptions)
+        pointoptions.append([pointdict[x[0]], x])
     for x in range(0,len(pointoptions)-1):
-        if pointoptions[x][0] <= pointoptions[x+1][0]:
-            lowestpoint = pointoptions[x]
+        if pointoptions[x][0] < pointoptions[x+1][0] and pointoptions[x][0] <10000:
+            lowestpoint = pointoptions[x][1]
         
-    print(lowestpoint)
+    return lowestpoint
 
 
 
